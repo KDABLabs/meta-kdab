@@ -1,0 +1,57 @@
+From 812fcaafa2f022ea5f1ba75b2bb7ec7d35e9d8a9 Mon Sep 17 00:00:00 2001
+From: Nathan Collins <nathan.collins@kdab.com>
+Date: Mon, 10 Mar 2025 14:26:26 +0000
+Subject: [PATCH] Introduce WaylandProtocols_PKG_CONFIG_SYSROOT_DIR
+
+This CMake variable can be set to control the PKG_CONFIG_SYSROOT_DIR
+when searching for WaylandProtocols. This is useful because the
+default behaviour on Yocto is to find the target modules. For
+WaylandProtocols we need to host module, so that we can parse the XML.
+---
+ .../find-modules/FindWaylandProtocols.cmake   | 26 +++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/cmake/ECM/find-modules/FindWaylandProtocols.cmake b/cmake/ECM/find-modules/FindWaylandProtocols.cmake
+index a444988..d64b295 100644
+--- a/cmake/ECM/find-modules/FindWaylandProtocols.cmake
++++ b/cmake/ECM/find-modules/FindWaylandProtocols.cmake
+@@ -16,9 +16,24 @@ This will define the following variables:
+     The version of wayland-protocols
+ ``WaylandProtocols_DATADIR``
+     The wayland protocols data directory
++
++The following variables can be set:
++
++``WaylandProtocols_PKG_CONFIG_SYSROOT_DIR``
++    The PKG_CONFIG_SYSROOT_DIR to use when searching for wayland-protocols.
+ #]=======================================================================]
+ 
+ find_package(PkgConfig QUIET)
++
++set(_WaylandProtocols_PKG_CONFIG_SYSROOT_DIR_SET OFF)
++if(DEFINED ENV{PKG_CONFIG_SYSROOT_DIR})
++    set(_WaylandProtocols_PKG_CONFIG_SYSROOT_DIR_SET ON)
++endif()
++set(_WaylandProtocols_PKG_CONFIG_SYSROOT_DIR_ORIG "$ENV{PKG_CONFIG_SYSROOT_DIR}")
++
++if(WaylandProtocols_PKG_CONFIG_SYSROOT_DIR)
++    set(ENV{PKG_CONFIG_SYSROOT_DIR} "${WaylandProtocols_PKG_CONFIG_SYSROOT_DIR}")
++endif()
+ pkg_check_modules(PKG_wayland_protocols QUIET wayland-protocols)
+ 
+ set(WaylandProtocols_VERSION ${PKG_wayland_protocols_VERSION})
+@@ -36,3 +51,14 @@ set_package_properties(WaylandProtocols PROPERTIES
+     DESCRIPTION "Specifications of extended Wayland protocols"
+     URL "https://wayland.freedesktop.org/"
+ )
++
++# Reset PKG_CONFIG_SYSROOT_DIR if required
++if(WaylandProtocols_PKG_CONFIG_SYSROOT_DIR)
++    if(_WaylandProtocols_PKG_CONFIG_SYSROOT_DIR_SET)
++        set(ENV{PKG_CONFIG_SYSROOT_DIR} "${_WaylandProtocols_PKG_CONFIG_SYSROOT_DIR_ORIG}")
++    else()
++        unset(ENV{PKG_CONFIG_SYSROOT_DIR})
++    endif()
++endif()
++unset(_WaylandProtocols_PKG_CONFIG_SYSROOT_DIR_SET)
++unset(_WaylandProtocols_PKG_CONFIG_SYSROOT_DIR_ORIG)

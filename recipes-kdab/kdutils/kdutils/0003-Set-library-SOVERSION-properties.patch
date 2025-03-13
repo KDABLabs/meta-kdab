@@ -1,0 +1,50 @@
+From c4268de50f6e1428f82529c0491d9c4669e53512 Mon Sep 17 00:00:00 2001
+From: Nathan Collins <nathan.collins@kdab.com>
+Date: Mon, 10 Mar 2025 14:41:01 +0000
+Subject: [PATCH] Set library SOVERSION properties
+
+Yocto requires unversioned .so files to be symlinks to versioned .so
+files (e.g. libKDUtils.so.0.1.10). Set the VERSION and SOVERSION
+target properties to CMAKE_PROJECT_VERSION to achieve this.
+---
+ src/KDFoundation/CMakeLists.txt | 1 +
+ src/KDGui/CMakeLists.txt        | 1 +
+ src/KDUtils/CMakeLists.txt      | 1 +
+ 3 files changed, 3 insertions(+)
+
+diff --git a/src/KDFoundation/CMakeLists.txt b/src/KDFoundation/CMakeLists.txt
+index b6c61c7..9f5ab29 100644
+--- a/src/KDFoundation/CMakeLists.txt
++++ b/src/KDFoundation/CMakeLists.txt
+@@ -84,6 +84,7 @@ add_library(
+ add_library(
+     KDUtils::KDFoundation ALIAS KDFoundation
+ )
++set_target_properties(KDFoundation PROPERTIES VERSION ${CMAKE_PROJECT_VERSION} SOVERSION ${CMAKE_PROJECT_VERSION})
+ 
+ target_link_libraries(
+     KDFoundation
+diff --git a/src/KDGui/CMakeLists.txt b/src/KDGui/CMakeLists.txt
+index b60a91c..27e738f 100644
+--- a/src/KDGui/CMakeLists.txt
++++ b/src/KDGui/CMakeLists.txt
+@@ -101,6 +101,7 @@ add_library(
+ add_library(
+     KDUtils::KDGui ALIAS KDGui
+ )
++set_target_properties(KDGui PROPERTIES VERSION ${CMAKE_PROJECT_VERSION} SOVERSION ${CMAKE_PROJECT_VERSION})
+ 
+ set(KDGUI_PUBLIC_LIBS KDUtils::KDFoundation)
+ 
+diff --git a/src/KDUtils/CMakeLists.txt b/src/KDUtils/CMakeLists.txt
+index baf8d1c..0abe731 100644
+--- a/src/KDUtils/CMakeLists.txt
++++ b/src/KDUtils/CMakeLists.txt
+@@ -39,6 +39,7 @@ add_library(
+ add_library(
+     KDUtils::KDUtils ALIAS KDUtils
+ )
++set_target_properties(KDUtils PROPERTIES VERSION ${CMAKE_PROJECT_VERSION} SOVERSION ${CMAKE_PROJECT_VERSION})
+ target_link_libraries(
+     KDUtils
+     PUBLIC spdlog::spdlog

@@ -1,0 +1,47 @@
+From c7aed36cd10ac8ca48ea77c6a901ca05bf92d8e7 Mon Sep 17 00:00:00 2001
+From: Nathan Collins <nathan.collins@kdab.com>
+Date: Fri, 7 Mar 2025 16:45:07 +0000
+Subject: [PATCH] Use consistent naming for whereami
+
+CMake find_package calls are case sensitive. This means we need to
+rename FindWhereami.cmake to Findwhereami.cmake in order for it to be
+considered when finding whereami.
+
+Additionally, the whereami_FOUND variable also needs the correct
+capitalisation.
+
+Prefer "whereami" over "Whereami" as the former was more commonly used
+in existing CMake code.
+---
+ cmake/{FindWhereami.cmake => Findwhereami.cmake} | 2 +-
+ cmake/dependencies.cmake                         | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+ rename cmake/{FindWhereami.cmake => Findwhereami.cmake} (96%)
+
+diff --git a/cmake/FindWhereami.cmake b/cmake/Findwhereami.cmake
+similarity index 96%
+rename from cmake/FindWhereami.cmake
+rename to cmake/Findwhereami.cmake
+index 04b9193..3997566 100644
+--- a/cmake/FindWhereami.cmake
++++ b/cmake/Findwhereami.cmake
+@@ -18,5 +18,5 @@ if(WHEREAMI_LIB AND WHEREAMI_HEADER)
+         whereami::whereami PROPERTIES IMPORTED_LOCATION ${WHEREAMI_LIB} INTERFACE_INCLUDE_DIRECTORIES
+                                                                         ${WHEREAMI_INCLUDE_DIRECTORIES}
+     )
+-    set(Whereami_FOUND TRUE)
++    set(whereami_FOUND TRUE)
+ endif()
+diff --git a/cmake/dependencies.cmake b/cmake/dependencies.cmake
+index 34a95ee..b5d6a25 100644
+--- a/cmake/dependencies.cmake
++++ b/cmake/dependencies.cmake
+@@ -80,7 +80,7 @@ if(NOT TARGET KDAB::KDBindings)
+ endif()
+ 
+ # whereami library
+-find_package(Whereami QUIET)
++find_package(whereami QUIET)
+ if(NOT TARGET whereami::whereami)
+     fetchcontent_declare(
+         whereami
