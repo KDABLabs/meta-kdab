@@ -1,0 +1,65 @@
+From dacf4d948c8c3aad5d56a870b12bc32fcdf8f287 Mon Sep 17 00:00:00 2001
+From: Nathan Collins <nathan.collins@kdab.com>
+Date: Tue, 11 Mar 2025 10:20:10 +0000
+Subject: [PATCH] Setup the project for build and installation with CMake
+
+Build as a shared library and install it using CMake. This allows us
+to easily re-use the project as a dependency of other projects.
+---
+ CMakeLists.txt           | 34 ++++++++++++++++++++++++++++++++++
+ whereami-config.cmake.in |  5 +++++
+ 2 files changed, 39 insertions(+)
+ create mode 100644 CMakeLists.txt
+ create mode 100644 whereami-config.cmake.in
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000..b1b75c1
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,34 @@
++cmake_minimum_required(VERSION 3.28.3)
++project(
++  whereami
++  LANGUAGES C
++  VERSION 0.1.0)
++
++include(GNUInstallDirs)
++include(CMakePackageConfigHelpers)
++
++add_library(whereami SHARED src/whereami.c)
++add_library(whereami::whereami ALIAS whereami)
++set_target_properties(whereami PROPERTIES VERSION ${CMAKE_PROJECT_VERSION}
++                                          SOVERSION ${CMAKE_PROJECT_VERSION})
++target_include_directories(
++  whereami PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
++                  $<INSTALL_INTERFACE:include>)
++
++configure_package_config_file(
++  whereami-config.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/whereami-config.cmake
++  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/whereami
++  PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
++write_basic_package_version_file(
++  ${CMAKE_CURRENT_BINARY_DIR}/whereami-configVersion.cmake
++  VERSION ${CMAKE_PROJECT_VERSION}
++  COMPATIBILITY SameMajorVersion)
++
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/whereami-config.cmake
++              ${CMAKE_CURRENT_BINARY_DIR}/whereami-configVersion.cmake
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/whereami)
++
++install(FILES src/whereami.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++install(TARGETS whereami EXPORT whereami-targets)
++install(EXPORT whereami-targets
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/whereami)
+diff --git a/whereami-config.cmake.in b/whereami-config.cmake.in
+new file mode 100644
+index 0000000..508d0ab
+--- /dev/null
++++ b/whereami-config.cmake.in
+@@ -0,0 +1,5 @@
++@PACKAGE_INIT@
++
++include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@-targets.cmake")
++
++check_required_components(whereami)
